@@ -1,5 +1,5 @@
 selenium:
-    build: .
-    ports:
-        - 4000:4000
-    privileged: true
+  build: .
+  ports:
+    - 4000:4000
+  privileged: true
