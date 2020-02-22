@@ -12,7 +12,7 @@ logging.getLogger().setLevel(logging.INFO)
 BASE_URL = 'https://www.google.com/'
 
 
-def get_title(key):
+def get_title():
     display = Display(visible=0, size=(800, 600))
     display.start()
     logging.info('Initialized virtual display..')
@@ -28,25 +28,26 @@ def get_title(key):
 
     driver = webdriver.Chrome(chrome_options=chrome_options)
     logging.info('Initialized chrome driver..')
-
-    base_url = 'https://www.youtube.com/results?search_query='
-    url_search = base_url + urllib.parse.quote(key)
-    driver.get(url_search)
-    sleep(3)
-    html = driver.find_element_by_tag_name('html')
-    for i in range(5):
-        html.send_keys(Keys.END)
+    with open('diykey.txt', 'r', encoding='utf-8') as f:
+        list_key = f.read().split('\n')
+    for key in list_key:
+        base_url = 'https://www.youtube.com/results?search_query='
+        url_search = base_url + urllib.parse.quote(key)
+        driver.get(url_search)
         sleep(3)
-    ele_titles = driver.find_elements_by_css_selector(
-        '#video-title > yt-formatted-string')
-    titles = []
-    for e in ele_titles:
-        print(e.text)
-        titles.append(f'{key} - {e.text}')
-    
-    with open('title_video', 'a+') as f:
-        f.write('\n'.join(titles))
+        html = driver.find_element_by_tag_name('html')
+        for i in range(2):
+            html.send_keys(Keys.END)
+            sleep(3)
+        ele_titles = driver.find_elements_by_css_selector(
+            '#video-title > yt-formatted-string')
+        titles = []
+        for e in ele_titles:
+            print(e.text)
+            titles.append(f'{key} - {e.text}')
 
+        with open('title_video', 'a+') as f:
+            f.write('\n'.join(titles))
     driver.quit()
     display.stop()
 
@@ -76,8 +77,6 @@ def firefox_example():
     display.stop()
 
 
-
-
 def main():
     with open('diykey.txt', 'r', encoding='utf-8') as f:
         list_key = f.read().split('\n')
@@ -86,6 +85,4 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
-
-
+    get_title()
