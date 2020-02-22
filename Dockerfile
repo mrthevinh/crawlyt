@@ -46,7 +46,6 @@ RUN wget https://bitbucket.org/ariya/phantomjs/downloads/phantomjs-2.1.1-linux-x
     cp phantomjs-2.1.1-linux-x86_64/bin/phantomjs /usr/local/bin/phantomjs && \
     rm phantomjs-2.1.1-linux-x86_64.tar.bz2
 
-
 RUN pip3 install selenium
 RUN pip3 install pyvirtualdisplay
 
@@ -60,4 +59,4 @@ WORKDIR /$APP_HOME
 COPY . $APP_HOME/
 
 CMD tail -f /dev/null
-# CMD python3 example.py
+CMD python3 example.py

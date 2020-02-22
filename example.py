@@ -1,15 +1,18 @@
-import os
 import logging
+import os
+import urllib.parse
+from time import sleep
 
 from pyvirtualdisplay import Display
 from selenium import webdriver
+from selenium.webdriver.common.keys import Keys
 
 logging.getLogger().setLevel(logging.INFO)
 
-BASE_URL = 'http://www.example.com/'
+BASE_URL = 'https://www.google.com/'
 
 
-def chrome_example():
+def get_title(key):
     display = Display(visible=0, size=(800, 600))
     display.start()
     logging.info('Initialized virtual display..')
@@ -23,15 +26,28 @@ def chrome_example():
     })
     logging.info('Prepared chrome options..')
 
-    browser = webdriver.Chrome(chrome_options=chrome_options)
-    logging.info('Initialized chrome browser..')
+    driver = webdriver.Chrome(chrome_options=chrome_options)
+    logging.info('Initialized chrome driver..')
 
-    browser.get(BASE_URL)
-    logging.info('Accessed %s ..', BASE_URL)
+    base_url = 'https://www.youtube.com/results?search_query='
+    url_search = base_url + urllib.parse.quote(key)
+    driver.get(url_search)
+    sleep(3)
+    html = driver.find_element_by_tag_name('html')
+    for i in range(5):
+        html.send_keys(Keys.END)
+        sleep(3)
+    ele_titles = driver.find_elements_by_css_selector(
+        '#video-title > yt-formatted-string')
+    titles = []
+    for e in ele_titles:
+        print(e.text)
+        titles.append(f'{key} - {e.text}')
+    
+    with open('title_video', 'a+') as f:
+        f.write('\n'.join(titles))
 
-    logging.info('Page title: %s', browser.title)
-
-    browser.quit()
+    driver.quit()
     display.stop()
 
 
@@ -41,45 +57,35 @@ def firefox_example():
     logging.info('Initialized virtual display..')
 
     firefox_profile = webdriver.FirefoxProfile()
-    firefox_profile.set_preference('browser.download.folderList', 2)
-    firefox_profile.set_preference('browser.download.manager.showWhenStarting', False)
-    firefox_profile.set_preference('browser.download.dir', os.getcwd())
-    firefox_profile.set_preference('browser.helperApps.neverAsk.saveToDisk', 'text/csv')
+    firefox_profile.set_preference('driver.download.folderList', 2)
+    firefox_profile.set_preference('driver.download.manager.showWhenStarting', False)
+    firefox_profile.set_preference('driver.download.dir', os.getcwd())
+    firefox_profile.set_preference('driver.helperApps.neverAsk.saveToDisk', 'text/csv')
 
     logging.info('Prepared firefox profile..')
 
-    browser = webdriver.Firefox(firefox_profile=firefox_profile)
-    logging.info('Initialized firefox browser..')
+    driver = webdriver.Firefox(firefox_profile=firefox_profile)
+    logging.info('Initialized firefox driver..')
 
-    browser.get(BASE_URL)
+    driver.get(BASE_URL)
     logging.info('Accessed %s ..', BASE_URL)
 
-    logging.info('Page title: %s', browser.title)
+    logging.info('Page title: %s', driver.title)
 
-    browser.quit()
+    driver.quit()
     display.stop()
 
 
-def phantomjs_example():
-    display = Display(visible=0, size=(800, 600))
-    display.start()
-    logging.info('Initialized virtual display..')
-
-    browser = webdriver.PhantomJS()
-    logging.info('Initialized phantomjs browser..')
-
-    browser.get(BASE_URL)
-    logging.info('Accessed %s ..', BASE_URL)
-
-    logging.info('Page title: %s', browser.title)
-
-    browser.quit()
-    display.stop()
 
 
+def main():
+    with open('diykey.txt', 'r', encoding='utf-8') as f:
+        list_key = f.read().split('\n')
+    for key in list_key:
+        get_title(key)
 
 
 if __name__ == '__main__':
-    chrome_example()
-    firefox_example()
-    phantomjs_example()
+    main()
+
+
